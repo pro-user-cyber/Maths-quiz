@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kids Math Quiz</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background: #f6f7fb;
+      margin: 0;
+      padding: 0;
+    }
+    .app {
+      max-width: 420px;
+      margin: 20px auto;
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+      padding: 20px;
+    }
+    h1 {
+      font-size: 1.4rem;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    .progress {
+      text-align: center;
+      font-size: 0.9rem;
+      color: #666;
+      margin-bottom: 15px;
+    }
+    .question {
+      font-size: 1.2rem;
+      margin-bottom: 15px;
+      text-align: center;
+    }
+    .options {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    button {
+      padding: 12px;
+      border-radius: 10px;
+      border: none;
+      font-size: 1rem;
+      cursor: pointer;
+      background: #eaeafd;
+    }
+    button:hover {
+      background: #d6d6fb;
+    }
+    .result {
+      text-align: center;
+    }
+    .score {
+      font-size: 1.4rem;
+      margin: 15px 0;
+    }
+    .restart {
+      background: #6c63ff;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <div class="app" id="app">
+    <h1>🧮 Math Quiz for Kids</h1>
+    <div id="quiz">
+      <div class="progress" id="progress"></div>
+      <div class="question" id="question"></div>
+      <div class="options" id="options"></div>
+    </div>
+  </div>
+
+  <script>
+    const TOTAL_QUESTIONS = 20;
+    let currentQuestion = 0;
+    let score = 0;
+    let questions = [];
+
+    function random(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function isPrime(n) {
+      if (n < 2) return false;
+      for (let i = 2; i <= Math.sqrt(n); i++) {
+        if (n % i === 0) return false;
+      }
+      return true;
+    }
+
+    function generateQuestion() {
+      const type = random(1, 10);
+      let q = {}, a, options = [];
+
+      let x = random(1, 20);
+      let y = random(1, 20);
+
+      switch (type) {
+        case 1: // addition
+          q.text = `What is ${x} + ${y}?`;
+          a = x + y;
+          break;
+        case 2: // subtraction
+          if (y > x) [x, y] = [y, x];
+          q.text = `What is ${x} − ${y}?`;
+          a = x - y;
+          break;
+        case 3: // multiplication
+          q.text = `What is ${x} × ${y}?`;
+          a = x * y;
+          break;
+        case 4: // division
+          a = random(1, 10);
+          x = a * y;
+          q.text = `What is ${x} ÷ ${y}?`;
+          break;
+        case 5: // even or odd
+          q.text = `Is ${x} even or odd?`;
+          a = x % 2 === 0 ? "Even" : "Odd";
+          options = ["Even", "Odd"];
+          break;
+        case 6: // prime
+          q.text = `Is ${x} a prime number?`;
+          a = isPrime(x) ? "Yes" : "No";
+          options = ["Yes", "No"];
+          break;
+        case 7: // consecutive
+          q.text = `Which number comes after ${x}?`;
+          a = x + 1;
+          break;
+        case 8: // sum
+          q.text = `Find the sum of ${x} and ${y}.`;
+          a = x + y;
+          break;
+        case 9: // product
+          q.text = `Find the product of ${x} and ${y}.`;
+          a = x * y;
+          break;
+        case 10: // difference
+          if (y > x) [x, y] = [y, x];
+          q.text = `Find the difference between ${x} and ${y}.`;
+          a = x - y;
+          break;
+      }
+
+      if (options.length === 0) {
+        options = [a, a + random(1, 5), a - random(1, 5), a + random(6, 10)];
+        options = options.sort(() => Math.random() - 0.5);
+      }
+
+      q.answer = a;
+      q.options = options;
+      return q;
+    }
+
+    function startQuiz() {
+      questions = [];
+      for (let i = 0; i < TOTAL_QUESTIONS; i++) {
+        questions.push(generateQuestion());
+      }
+      currentQuestion = 0;
+      score = 0;
+      showQuestion();
+    }
+
+    function showQuestion() {
+      const q = questions[currentQuestion];
+      document.getElementById('progress').innerText = `Question ${currentQuestion + 1} of ${TOTAL_QUESTIONS}`;
+      document.getElementById('question').innerText = q.text;
+
+      const optionsDiv = document.getElementById('options');
+      optionsDiv.innerHTML = '';
+
+      q.options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.innerText = opt;
+        btn.onclick = () => checkAnswer(opt);
+        optionsDiv.appendChild(btn);
+      });
+    }
+
+    function checkAnswer(selected) {
+      if (selected === questions[currentQuestion].answer) {
+        score++;
+      }
+      currentQuestion++;
+      if (currentQuestion < TOTAL_QUESTIONS) {
+        showQuestion();
+      } else {
+        showResult();
+      }
+    }
+
+    function showResult() {
+      document.getElementById('app').innerHTML = `
+        <h1>🎉 Quiz Finished</h1>
+        <div class="result">
+          <div class="score">Score: ${score} / ${TOTAL_QUESTIONS}</div>
+          <button class="restart" onclick="location.reload()">Play Again</button>
+        </div>
+      `;
+    }
+
+    startQuiz();
+  </script>
+</body>
+</html>
